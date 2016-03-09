@@ -1,10 +1,11 @@
 # Musethereal 
-![alt text](https://raw.githubusercontent.com/GrooveTherapy/musethereal/master/musetherealfull.jpg "Musethereal")
 
 ## Overview
 
 This repository contains code for the [MakeFashion](http://www.makefashion.ca/) project known as Musethereal.
 Musethereal is a dress modelled after the [neuron](https://en.wikipedia.org/wiki/Neuron).  This repository contains the code for the conceptual nucleus and axon.  
+
+![alt text](https://raw.githubusercontent.com/GrooveTherapy/musethereal/master/musetherealfull.jpg "Musethereal")
 
 ## Technology Stack
 
