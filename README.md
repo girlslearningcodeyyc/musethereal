@@ -1,5 +1,5 @@
 # Musethereal 
-![alt text](https://raw.githubusercontent.com/GrooveTherapy/musethereal/master/android/example/src/main/res/mipmap-xxxhdpi/musethereal.jpg "Musethereal")
+![alt text](https://raw.githubusercontent.com/GrooveTherapy/musethereal/master/musetherealfull.jpg "Musethereal")
 
 ## Overview
 
