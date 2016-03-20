@@ -14,7 +14,7 @@ Adafruit_NeoPixel array1 = Adafruit_NeoPixel(ARRAY1PIXELS, ARRAY1PIN, NEO_GRB + 
 #define COLORSLENGTH  20
 char colors [COLORSLENGTH];
 
-int delayval = 50; // delay for half a second
+int delayval = 250; // delay for half a second
 
 void setup() {
   Serial.begin(9600);
@@ -27,7 +27,7 @@ void setup() {
   writeColorsToLEDs();
 }
 
-void loop() {
+void loop2  () {
   char c;
 
   if (Serial.available()) {
@@ -36,6 +36,23 @@ void loop() {
     if (c != 0) {
       addToColors(c);
       writeColorsToLEDs();
+    }
+  }
+}
+
+void loop() {
+  char rainbow [8] = {'r', 'o', 'y', 'g', 'c', 'b', 'v', 'p'};
+  int count = 0;
+  while(true) {
+    addToColors(rainbow[count]);
+    writeColorsToLEDs();
+    delay(delayval);
+    
+    if (count == 7) {
+      count = 0;
+    }
+    else {
+      count++;
     }
   }
 }
