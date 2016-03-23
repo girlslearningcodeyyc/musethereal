@@ -1,3 +1,4 @@
+/*
 package com.felhr.serialportexample;
 
 import android.content.BroadcastReceiver;
@@ -23,9 +24,7 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
-    /*
-     * Notifications from UsbService will be received here.
-     */
+    //Notifications from UsbService will be received here.
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -130,9 +129,7 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(mUsbReceiver, filter);
     }
 
-    /*
-     * This handler will be passed to UsbService. Data received from serial port is displayed through this handler
-     */
+    //This handler will be passed to UsbService. Data received from serial port is displayed through this handler
     private static class MyHandler extends Handler {
         private final WeakReference<MainActivity> mActivity;
 
@@ -157,3 +154,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+*/

@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.emotiv.connectionmanager.ConnectionManager;
 //import com.example.fftsample.R;
-import com.felhr.serialportexample.R;
+import com.musethereal.R;
 
 import java.util.ArrayList;
 import java.util.List;
