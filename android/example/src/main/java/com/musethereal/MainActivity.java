@@ -37,10 +37,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Initialize app components
-        _epocPlus = new EEGHeadset();
-        _epocPlus.Connect();
-
-        _ledDress = new DressController();
-        _ledDress.Connect();
+//        _epocPlus = new EEGHeadset();
+//        _epocPlus.Connect();
+//
+//        _ledDress = new DressController();
+//        _ledDress.Connect();
     }
 }
