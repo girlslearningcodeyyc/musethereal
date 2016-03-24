@@ -7,10 +7,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.emotiv.EEGHeadset;
+import com.felhr.serialportexample.DressController;
+
 /**
  * Created by kbrockman on 16-03-22.
  */
 public class MainActivity extends AppCompatActivity {
+
+    private EEGHeadset _epocPlus;
+    private DressController _ledDress;
 
     private TextView display;
 
@@ -29,5 +35,12 @@ public class MainActivity extends AppCompatActivity {
                 display.append("You clicked me!\r\n");
             }
         });
+
+        //Initialize app components
+        _epocPlus = new EEGHeadset();
+        _epocPlus.Connect();
+
+        _ledDress = new DressController();
+        _ledDress.Connect();
     }
 }
