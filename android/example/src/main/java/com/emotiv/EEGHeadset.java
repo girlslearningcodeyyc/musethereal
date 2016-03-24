@@ -10,4 +10,8 @@ public class EEGHeadset {
     public EEGHeadset() {
 
     }
+
+    public void Connect(){
+        //Get the headset
+    }
 }
