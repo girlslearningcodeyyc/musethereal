@@ -20,17 +20,20 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
+import java.util.List;
 import com.emotiv.insight.IEdk;
 import com.emotiv.insight.IEdkErrorCode;
 import com.emotiv.insight.IEdk.IEE_DataChannel_t;
@@ -85,7 +88,6 @@ public class EEGHeadset extends Service {
         Log.d(debugTag, "Set EPOC+ channel list");
         setChannelList();
 
-        //Set up BT manager
         Log.d(debugTag, "Setup BT Manager...");
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
@@ -97,7 +99,108 @@ public class EEGHeadset extends Service {
         } else {
             Log.d(debugTag, "Bluetooth enabled");
         }
+
+        Log.d(debugTag, "Get EPOC+");
+        int wat = IEdk.IEE_EngineConnect(EEGHeadset.this, "");
+        Log.d(debugTag, "Instantiate connection manager");
+        final ConnectionManager connectionManager = new ConnectionManager(EEGHeadset.this);
+        connectionManager.refreshDevices();
+        List<String> devices = connectionManager.getEpocPlus();
+        Log.d(debugTag, "Devices Found: " + devices.size());
+        Log.d(debugTag, "EPOC+ 0: " + connectionManager.isConnected());
+
+        Thread processingThread=new Thread()
+        {
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                super.run();
+                while(true)
+                {
+                    try
+                    {
+                        //handler.sendEmptyMessage(0);
+                        //handler.sendEmptyMessage(1);
+//						if(isEnablGetData && isEnableWriteFile)handler.sendEmptyMessage(2);
+                        Log.d(debugTag, "Trying to send messages to thread");
+                        Log.d(debugTag, "Connection state: " + connectionManager.isConnected);
+                        if(connectionManager.isConnected){
+                            handler.sendEmptyMessage(2);
+                        }
+                        Thread.sleep(1000);
+                    }
+
+                    catch (Exception ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        };
+        processingThread.start();
     }
+
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+
+                case 0:
+//                    Log.d("HANDLER", "CASE 0");
+//                    int state = IEdk.IEE_EngineGetNextEvent();
+//                    if (state == IEdkErrorCode.EDK_OK.ToInt()) {
+//                        int eventType = IEdk.IEE_EmoEngineEventGetType();
+//                        userId = IEdk.IEE_EmoEngineEventGetUserId();
+//                        if(eventType == IEE_Event_t.IEE_UserAdded.ToInt()){
+//                            Log.e("SDK","User added");
+//                            IEdk.IEE_FFTSetWindowingType(userId, IEdk.IEE_WindowsType_t.IEE_BLACKMAN);
+//                            isEnablGetData = true;
+//                        }
+//                        if(eventType == IEE_Event_t.IEE_UserRemoved.ToInt()){
+//                            Log.e("SDK","User removed");
+//                            isEnablGetData = false;
+//                        }
+//                    }
+
+                    break;
+                case 1:
+//                    Log.d("HANDLER", "CASE 1");
+//                    int number = IEdk.IEE_GetInsightDeviceCount();
+//                    if(number != 0) {
+//                        if(!lock){
+//                            lock = true;
+//                            IEdk.IEE_ConnectInsightDevice(0);
+//                        }
+//                    }
+//                    else lock = false;
+                    break;
+                case 2:
+                    Log.d("HANDLER", "CASE 2");
+                    IEE_DataChannel_t[] channels = (IEE_DataChannel_t[]) _channelList.values().toArray();
+                    for(int i=0; i < channels.length; i++)
+                    {
+                        double[] data = IEdk.IEE_GetAverageBandPowers(channels[i]);
+                        if(data != null && data.length == 5){
+                            try {
+                                Log.d(debugTag, "You could get data");
+//                                motion_writer.write(Name_Channel[i] + ",");
+//                                for(int j=0; j < data.length;j++)
+//                                    addData(data[j]);
+//                                motion_writer.newLine();
+                            } catch (Exception e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    break;
+            }
+
+        }
+
+    };
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

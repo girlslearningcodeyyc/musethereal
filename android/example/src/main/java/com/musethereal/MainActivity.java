@@ -19,9 +19,6 @@ import com.felhr.serialportexample.DressController;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private EEGHeadset _epocPlus;
-    private DressController _ledDress;
-
     private TextView display;
 
     @Override
