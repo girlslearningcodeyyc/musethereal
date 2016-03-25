@@ -44,6 +44,7 @@ import android.os.Process;
 public class EEGHeadset extends Service {
     private String debugTag = "EEGHeadset";
     private Looper mServiceLooper;
+    private BluetoothAdapter mBluetoothAdapter;
     private ServiceHandler mServiceHandler;
 
     // Handler that receives messages from the thread
@@ -80,6 +81,22 @@ public class EEGHeadset extends Service {
         // Get the HandlerThread's Looper and use it for our Handler
         mServiceLooper = thread.getLooper();
         mServiceHandler = new ServiceHandler(mServiceLooper);
+
+        Log.d(debugTag, "Set EPOC+ channel list");
+        setChannelList();
+
+        //Set up BT manager
+        Log.d(debugTag, "Setup BT Manager...");
+        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+        if (!mBluetoothAdapter.isEnabled()) {
+            Log.d(debugTag, "Bluetooth not enabled, sending request to enable");
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            enableBtIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(enableBtIntent);
+        } else {
+            Log.d(debugTag, "Bluetooth enabled");
+        }
     }
 
     @Override
@@ -106,12 +123,11 @@ public class EEGHeadset extends Service {
     }
 
     public EEGHeadset() {
-        setChannelList();
+
     }
 
     private Map<String, IEE_DataChannel_t> _channelList;
     private void setChannelList() {
-        Log.d(debugTag, "Setup Channel List");
         _channelList = new HashMap<String, IEE_DataChannel_t>();
         _channelList.put("AF3", IEE_DataChannel_t.IED_AF3);
         _channelList.put("T7", IEE_DataChannel_t.IED_T7);
