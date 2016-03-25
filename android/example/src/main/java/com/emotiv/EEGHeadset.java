@@ -7,10 +7,16 @@ import java.io.IOException;
 import com.emotiv.connectionmanager.ConnectionManager;
 import com.emotiv.widget.ChooseHeadsetDialog;
 
+import android.app.Service;
+import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,45 +26,92 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.Toast;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import com.emotiv.insight.IEdk;
 import com.emotiv.insight.IEdkErrorCode;
 import com.emotiv.insight.IEdk.IEE_DataChannel_t;
-import com.emotiv.insight.IEdk.IEE_Event_t;;
+import com.emotiv.insight.IEdk.IEE_Event_t;
+import com.musethereal.MainActivity;;
+import android.os.Process;
 
 /**
  * Created by kbrockman on 16-03-23.
  */
-public class EEGHeadset extends Activity {
+public class EEGHeadset extends Service {
+    private String debugTag = "EEGHeadset";
+    private Looper mServiceLooper;
+    private ServiceHandler mServiceHandler;
 
-    private static final int REQUEST_ENABLE_BT = 1;
-    private Map<String, IEE_DataChannel_t> _channelList;
-    private BluetoothAdapter mBluetoothAdapter;
+    // Handler that receives messages from the thread
+    private final class ServiceHandler extends Handler {
+        public ServiceHandler(Looper looper) {
+            super(looper);
+        }
+        @Override
+        public void handleMessage(Message msg) {
+            // Normally we would do some work here, like download a file.
+            // For our sample, we just sleep for 5 seconds.
+            try {
+                Log.d(debugTag, "handleMessage");
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                // Restore interrupt status.
+                Thread.currentThread().interrupt();
+            }
+            // Stop the service using the startId, so that we don't stop
+            // the service in the middle of handling another job
+            stopSelf(msg.arg1);
+        }
+    }
+
+    @Override
+    public void onCreate() {
+        // Start up the thread running the service.  Note that we create a
+        // separate thread because the service normally runs in the process's
+        // main thread, which we don't want to block.  We also make it
+        // background priority so CPU-intensive work will not disrupt our UI.
+        HandlerThread thread = new HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND);
+        thread.start();
+
+        // Get the HandlerThread's Looper and use it for our Handler
+        mServiceLooper = thread.getLooper();
+        mServiceHandler = new ServiceHandler(mServiceLooper);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        // For each start request, send a message to start a job and deliver the
+        // start ID so we know which request we're stopping when we finish the job
+        Message msg = mServiceHandler.obtainMessage();
+        msg.arg1 = startId;
+        mServiceHandler.sendMessage(msg);
+
+        // If we get killed, after returning from here, restart
+        return START_STICKY;
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        // We don't provide binding, so return null
+        return null;
+    }
+
+    @Override
+    public void onDestroy() {
+
+    }
 
     public EEGHeadset() {
         setChannelList();
     }
 
-    public void Connect(){
-        Log.d("HEADSET", "Connect to EPOC+");
-
-        //Basically run through emotiv-sample
-        //Try to skip having to do dialog stuff?
-
-        //Set up BT manager
-        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-        if (!mBluetoothAdapter.isEnabled()) {
-            if (!mBluetoothAdapter.isEnabled()) {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            }
-        }
-    }
-
+    private Map<String, IEE_DataChannel_t> _channelList;
     private void setChannelList() {
+        Log.d(debugTag, "Setup Channel List");
         _channelList = new HashMap<String, IEE_DataChannel_t>();
         _channelList.put("AF3", IEE_DataChannel_t.IED_AF3);
         _channelList.put("T7", IEE_DataChannel_t.IED_T7);
@@ -76,5 +129,4 @@ public class EEGHeadset extends Activity {
         _channelList.put("F8", IEE_DataChannel_t.IED_F8);
         _channelList.put("O1", IEE_DataChannel_t.IED_O1);
     }
-
 }

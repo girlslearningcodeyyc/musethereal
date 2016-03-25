@@ -26,9 +26,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <service
-            android:name="com.felhr.serialportexample.UsbService"
-            android:enabled="true">
-        </service>
+        <service android:name="com.felhr.serialportexample.UsbService" android:enabled="true" />
+        <service android:name="com.emotiv.EEGHeadset" android:enabled="true" />
     </application>
 </manifest>
