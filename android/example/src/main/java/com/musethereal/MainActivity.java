@@ -1,11 +1,10 @@
 package com.musethereal;
 
-import android.app.Activity;
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,13 +15,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.content.Intent;
 import com.felhr.serialportexample.UsbService;
-import android.widget.EditText;
+
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.widget.Toast;
 
 import com.emotiv.EEGHeadset;
-import com.felhr.serialportexample.DressController;
 
 import java.lang.ref.WeakReference;
 import java.util.Set;
@@ -33,6 +31,8 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
     private String debugTag = "MainActivity";
     private boolean startDress = false;
+    private TextView display;
+    ColorCalculator colorCalculator = new ColorCalculator();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         final Button sendButton = (Button) findViewById(R.id.buttonOn);
+        display = (TextView) findViewById(R.id.textView1);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,26 +98,38 @@ public class MainActivity extends AppCompatActivity {
         while(startDress){
 
             try{
-                this.runOnUiThread(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                TextView display = (TextView) findViewById(R.id.textView1);
-                                display.append("I am some data\r\n");
-                            }
-                        }
-                );
-
-                Thread.sleep(1000);
                 //Get reading from headset
 
                 //Run through color calculator
+                char[] vals = colorCalculator.ConvertToColors(null);
 
                 //Send to dress controller
+                Log.d(debugTag, "Write to dress:\n" + (int) vals[0]);
+                if (usbService != null) {
+                    usbService.write(vals.toString().getBytes());
+                }
+
+                //Update UI
+                //Be careful with this - as the thread sleep goes down, this call spams the UI thread
+                new SendCalculationToScreen().execute("You can't stop me\r\n");
+
+                Thread.sleep(1000);
             } catch (InterruptedException ex){
                 Log.d(debugTag, "Error in running: " + ex.getMessage());
             }
 
+        }
+    }
+
+    //See: http://developer.android.com/guide/components/processes-and-threads.html
+    private class SendCalculationToScreen extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... params) {
+            return params[0];
+        }
+
+        protected void onPostExecute(String result){
+            display.setText(result);
         }
     }
 

@@ -9,13 +9,61 @@
 // Set up first array of LEDs
 #define ARRAY1PIXELS      20
 #define ARRAY1PIN         6
-Adafruit_NeoPixel array1 = Adafruit_NeoPixel(ARRAY1PIXELS, ARRAY1PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel array1 = Adafruit_NeoPixel(14, ARRAY1PIN, NEO_GRB + NEO_KHZ800);
 
 #define COLORSLENGTH  20
 char colors [COLORSLENGTH];
 
+//14 channels - 13 dress LEDs + 1 axon LED
+//3 bytes per channel - one for R, one for G, one for B
+#define DRESSLEDARRAYLENGTH 13
+char dressLEDColors [DRESSLEDARRAYLENGTH][3];
+
 int delayval = 250; // delay for half a second
 
+void setup() {
+  Serial.begin(9600);
+  array1.begin();
+
+  for(int i = 0; i < DRESSLEDARRAYLENGTH; i++){
+    for(int j = 0; j < 3; j++){
+      dressLEDColors[i][j] = 0x000000;
+    }
+  }
+}
+
+void loop() {
+  //Only run through if serial port is avaiable and there is a valid stream coming in
+  if(Serial.available() && Serial.peek() != -1) {
+    //BIG ASSUMPTION HERE: if there is a valid next character, we are assuming there are enough valid characters to fill out dressLEDColors, which may not necessarily be true
+    //Not robust coding...    
+    for(int i = 0; i < DRESSLEDARRAYLENGTH; i++){
+      for(int j = 0; j < 3; j++){
+        char c;
+        if (Serial.peek() == -1){
+          c = 0x00;
+        } else {
+          c = Serial.read();
+        }
+        
+        dressLEDColors[i][j] = c;
+      }
+    }
+
+    writeColorsToLEDs();
+  }
+}
+
+
+void writeColorsToLEDs() {
+  for (int i = 0; i < DRESSLEDARRAYLENGTH; i++) {
+    array1.setPixelColor(i, dressLEDColors[i][0], dressLEDColors[i][1], dressLEDColors[i][2]); 
+  }
+
+  array1.show();
+}
+
+/*
 void setup() {
   Serial.begin(9600);
   array1.begin();
@@ -27,7 +75,7 @@ void setup() {
   writeColorsToLEDs();
 }
 
-void loop2  () {
+void loop () {
   char c;
 
   if (Serial.available()) {
@@ -40,7 +88,8 @@ void loop2  () {
   }
 }
 
-void loop() {
+//This is a test sequence
+void loop2() {
   char rainbow [8] = {'r', 'o', 'y', 'g', 'c', 'b', 'v', 'p'};
   int count = 0;
   while(true) {
@@ -97,5 +146,5 @@ uint32_t convertToColor(char c) {
       return 0x000000;
   }
 }
-
+*/
 
