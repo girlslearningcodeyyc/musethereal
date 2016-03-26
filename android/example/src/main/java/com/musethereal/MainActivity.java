@@ -104,9 +104,23 @@ public class MainActivity extends AppCompatActivity {
                 char[] vals = colorCalculator.ConvertToColors(null);
 
                 //Send to dress controller
-                Log.d(debugTag, "Write to dress:\n" + (int) vals[0]);
+                //Log.d(debugTag, "Write to dress:\n" + (int) vals[0]);
                 if (usbService != null) {
-                    usbService.write(vals.toString().getBytes());
+                    usbService.write(new byte[]{
+                            (byte) 0xFF, (byte) 0x00, (byte) 0x00,
+                            (byte) 0x00, (byte) 0xFF, (byte) 0x00,
+                            (byte) 0x00, (byte) 0x00, (byte) 0xFF,
+                            (byte) 0xFF, (byte) 0xFF, (byte) 0x00,
+                            (byte) 0x00, (byte) 0xFF, (byte) 0xFF,
+                            (byte) 0xFF, (byte) 0x00, (byte) 0xFF,
+                            (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,
+                            (byte) 0xFF, (byte) 0x99, (byte) 0x00,
+                            (byte) 0x99, (byte) 0x00, (byte) 0xFF,
+                            (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                            (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                            (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                            (byte) 0x00, (byte) 0x00, (byte) 0x00
+                            });
                 }
 
                 //Update UI
