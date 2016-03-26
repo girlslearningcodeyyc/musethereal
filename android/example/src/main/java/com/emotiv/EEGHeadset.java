@@ -102,6 +102,7 @@ public class EEGHeadset extends Service {
 
         Log.d(debugTag, "Get EPOC+");
         int wat = IEdk.IEE_EngineConnect(EEGHeadset.this, "");
+        Log.d(debugTag, "Connection return is " + wat);
         Log.d(debugTag, "Instantiate connection manager");
         final ConnectionManager connectionManager = new ConnectionManager(EEGHeadset.this);
         connectionManager.refreshDevices();
