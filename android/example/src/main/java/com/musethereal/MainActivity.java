@@ -101,26 +101,12 @@ public class MainActivity extends AppCompatActivity {
                 //Get reading from headset
 
                 //Run through color calculator
-                char[] vals = colorCalculator.ConvertToColors(null);
+                byte[] vals = colorCalculator.ConvertToColors(null);
 
                 //Send to dress controller
                 //Log.d(debugTag, "Write to dress:\n" + (int) vals[0]);
                 if (usbService != null) {
-                    usbService.write(new byte[]{
-                            (byte) 0xFF, (byte) 0x00, (byte) 0x00,
-                            (byte) 0x00, (byte) 0xFF, (byte) 0x00,
-                            (byte) 0x00, (byte) 0x00, (byte) 0xFF,
-                            (byte) 0xFF, (byte) 0xFF, (byte) 0x00,
-                            (byte) 0x00, (byte) 0xFF, (byte) 0xFF,
-                            (byte) 0xFF, (byte) 0x00, (byte) 0xFF,
-                            (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,
-                            (byte) 0xFF, (byte) 0x99, (byte) 0x00,
-                            (byte) 0x99, (byte) 0x00, (byte) 0xFF,
-                            (byte) 0x00, (byte) 0x00, (byte) 0x00,
-                            (byte) 0x00, (byte) 0x00, (byte) 0x00,
-                            (byte) 0x00, (byte) 0x00, (byte) 0x00,
-                            (byte) 0x00, (byte) 0x00, (byte) 0x00
-                            });
+                    usbService.write(vals);
                 }
 
                 //Update UI
