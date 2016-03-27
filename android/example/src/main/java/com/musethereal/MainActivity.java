@@ -1,5 +1,7 @@
 package com.musethereal;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,6 +16,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.content.Intent;
+
+import com.emotiv.connectionmanager.ConnectionManager;
+import com.emotiv.insight.IEdk;
+import com.emotiv.insight.IEdkErrorCode;
+import com.emotiv.widget.ChooseHeadsetDialog;
 import com.felhr.serialportexample.UsbService;
 
 import android.content.ServiceConnection;
@@ -22,6 +29,7 @@ import android.widget.Toast;
 
 import com.emotiv.EEGHeadset;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Set;
 
@@ -31,9 +39,11 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
     private String debugTag = "MainActivity";
     private boolean startDress = false;
-    private TextView display;
     ColorCalculator colorCalculator = new ColorCalculator();
     private boolean readyToTransmit;
+
+    //UI Elements
+    private TextView display;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,22 +52,77 @@ public class MainActivity extends AppCompatActivity {
 
         //main screen turn on
         Log.d("Online", "Goliath Online");
+
+        //Set up EEG headset stuff
+        //Set up BT manager
+        final BluetoothManager bluetoothManager =
+                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+        if (!mBluetoothAdapter.isEnabled()) {
+            if (!mBluetoothAdapter.isEnabled()) {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            }
+        }
+
+        //Attach button click to headset selection
+        Button headsetConnectButton = (Button) findViewById(R.id.epocButton);
+        headsetConnectButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                //TODO: need this step to select the headset - maybe there's just a way to grab it or complain if it doesnt exist
+                ChooseHeadsetDialog dialog = new ChooseHeadsetDialog(MainActivity.this);
+                dialog.show();
+            }
+        });
+
+        //Connect to emoEngine
+        IEdk.IEE_EngineConnect(this, "");
+        Thread processingThread=new Thread()
+        {
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                super.run();
+                while(true)
+                {
+                    try
+                    {
+                        //handler.sendEmptyMessage(0);
+                        //handler.sendEmptyMessage(1);
+//						if(isEnablGetData && isEnableWriteFile)handler.sendEmptyMessage(2);
+                        if(ConnectionManager.isConnected){
+                            //TODO: only seems to hit case 2 in the handler...
+                            handler.sendEmptyMessage(2);
+                        }
+                        Thread.sleep(5);
+                    }
+
+                    catch (Exception ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        };
+        processingThread.start();
     }
 
     @Override
     protected void onStart(){
         super.onStart();
 
-        final Button sendButton = (Button) findViewById(R.id.buttonOn);
+        final Button startButton = (Button) findViewById(R.id.buttonOn);
         display = (TextView) findViewById(R.id.textView1);
         mHandler = new MyHandler(this);
-        sendButton.setOnClickListener(new View.OnClickListener() {
+        startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startDress = !startDress;
 
                 String buttonText = startDress ? "Off" : "On";
-                sendButton.setText(buttonText);
+                startButton.setText(buttonText);
 
                 Thread thr = new Thread() {
                     @Override
@@ -230,12 +295,59 @@ public class MainActivity extends AppCompatActivity {
     //endregion
 
     //region EEG Headset
+    private String eegHeadset = "eegHeadset";
+    IEdk.IEE_DataChannel_t[] Channel_list = {
+            IEdk.IEE_DataChannel_t.IED_AF3,
+            IEdk.IEE_DataChannel_t.IED_T7,
+            IEdk.IEE_DataChannel_t.IED_Pz,
+            IEdk.IEE_DataChannel_t.IED_T8,
+            IEdk.IEE_DataChannel_t.IED_AF4,
+            IEdk.IEE_DataChannel_t.IED_O2,
+            IEdk.IEE_DataChannel_t.IED_F7,
+            IEdk.IEE_DataChannel_t.IED_P8,
+            IEdk.IEE_DataChannel_t.IED_F3,
+            IEdk.IEE_DataChannel_t.IED_FC5,
+            IEdk.IEE_DataChannel_t.IED_FC6,
+            IEdk.IEE_DataChannel_t.IED_F4,
+            IEdk.IEE_DataChannel_t.IED_P7,
+            IEdk.IEE_DataChannel_t.IED_F8,
+            IEdk.IEE_DataChannel_t.IED_O1};
+    String[] Name_Channel = {
+            "AF3",
+            "T7",
+            "Pz",
+            "T8",
+            "AF4",
+            "O2",
+            "F7",
+            "P8",
+            "F3",
+            "FC5",
+            "FC6",
+            "F4",
+            "P7",
+            "F8",
+            "O1"};
 
-    private void starterUp(){
-        //Start EEGHeadset service
-        Intent i = new Intent(this, EEGHeadset.class);
-        startService(i);
-    }
+    private BluetoothAdapter mBluetoothAdapter;
+    private static final int REQUEST_ENABLE_BT = 1;
+
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            for(int i=0; i < Channel_list.length; i++)
+            {
+                double[] data = IEdk.IEE_GetAverageBandPowers(Channel_list[i]);
+                if(data != null && data.length == 5){
+                    Log.d(eegHeadset, Name_Channel[i] + ",");
+                    for(int j=0; j < data.length;j++)
+                        Log.d(eegHeadset, String.valueOf(data[j]));
+                }
+            }
+
+        }
+
+    };
 
     //endregion
 }

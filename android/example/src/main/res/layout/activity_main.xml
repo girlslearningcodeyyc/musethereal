@@ -24,6 +24,14 @@
         android:layout_height="wrap_content"
         android:text="On"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignEnd="@+id/textView1" />
+        android:layout_alignEnd="@+id/textView1"
+        android:background="#0026ff" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect EPOC+"
+        android:id="@+id/epocButton"
+        android:layout_below="@+id/textView1"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>
