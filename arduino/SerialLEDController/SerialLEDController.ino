@@ -75,7 +75,6 @@ void loop(){
 }
 
 uint32_t calculateTransitionColor(uint32_t currentColor, uint32_t targetColor, int stepNum, int stepMax) {
-  //Break out each RGB current and target value
   uint8_t rcur = (currentColor & 0xFF0000) >> 16;
   uint8_t rtar = (targetColor & 0xFF0000) >> 16;
   uint8_t gcur = (currentColor & 0x00FF00) >> 8;
@@ -83,29 +82,14 @@ uint32_t calculateTransitionColor(uint32_t currentColor, uint32_t targetColor, i
   uint8_t bcur = (currentColor & 0x0000FF);
   uint8_t btar = (targetColor & 0x0000FF);
   
-  //printf("rcur %#08x\n", rcur);
-  //printf("rtar %#08x\n", rtar);
-  //printf("gcur %#08x\n", gcur);
-  //printf("gtar %#08x\n", gtar);
-  //printf("bcur %#08x\n", bcur);
-  //printf("btar %#08x\n", btar);
-  
   int rstep = (rtar - rcur) / stepMax;
   int gstep = (gtar - gcur) / stepMax;
   int bstep = (btar - bcur) / stepMax;
   
-  //printf("rstep %i\n", rstep);
-  //printf("gstep %i\n", gstep);
-  //printf("bstep %i\n", bstep);
-  
   uint32_t rnow = rcur + rstep * stepNum;
   uint32_t gnow = gcur + gstep * stepNum;
   uint32_t bnow = bcur + bstep * stepNum;
-  
-  //printf("rnow %i\n", rnow);
-  //printf("gnow %i\n", gnow);
-  //printf("bnow %i\n", bnow);
-  
+    
   uint32_t calc = 0x000000 + (rnow << 16) + (gnow << 8) + bnow;
   return calc;
 }
@@ -132,97 +116,4 @@ uint32_t convertToColor(char c) {
     default:  return 0x000000;
   }
 }
-
-/*
-void loop() {
-  //Only run through if serial port is avaiable and there is a valid stream coming in
-  if(Serial.available() && Serial.peek() != -1) {
-    //BIG ASSUMPTION HERE: if there is a valid next character, we are assuming there are enough valid characters to fill out dressLEDColors, which may not necessarily be true
-    //Not robust coding...    
-    for(int i = 0; i < DRESSLEDARRAYLENGTH; i++){
-      for(int j = 0; j < 3; j++){
-        char c;
-        if (Serial.peek() == -1){
-          c = 0x00;
-        } else {
-          c = Serial.read();
-        }
-        
-        dressLEDColors[i][j] = c;
-      }
-    }
-
-    writeColorsToLEDs();
-  }
-}
-
-
-void writeColorsToLEDs() {
-  for (int i = 0; i < DRESSLEDARRAYLENGTH; i++) {
-    array1.setPixelColor(i, dressLEDColors[i][0], dressLEDColors[i][1], dressLEDColors[i][2]); 
-  }
-
-  array1.show();
-}
-
-void setup() {
-  Serial.begin(9600);
-  array1.begin();
-
-  for (int i = 0; i < COLORSLENGTH; i++) {
-    colors[i] = 'n';
-  }
-
-  writeColorsToLEDs();
-}
-
-void loop () {
-  char c;
-
-  if (Serial.available()) {
-    c = Serial.read();
-
-    if (c != 0) {
-      addToColors(c);
-      writeColorsToLEDs();
-    }
-  }
-}
-
-//This is a test sequence
-void loop2() {
-  char rainbow [8] = {'r', 'o', 'y', 'g', 'c', 'b', 'v', 'p'};
-  int count = 0;
-  while(true) {
-    addToColors(rainbow[count]);
-    writeColorsToLEDs();
-    delay(delayval);
-    
-    if (count == 7) {
-      count = 0;
-    }
-    else {
-      count++;
-    }
-  }
-}
-
-void addToColors(char c) {
-  for (int i = COLORSLENGTH - 1; i > 0; i--) {
-    colors[i] = colors[i - 1];
-  }
-
-  colors[0] = c;
-}
-
-void writeColorsToLEDs() {
-  for (int i = 0; i < ARRAY1PIXELS; i++) {
-    array1.setPixelColor(i, convertToColor(colors[i])); // Moderately bright green color.
-  }
-
-  array1.show();
-}
-
-
-*/
 
