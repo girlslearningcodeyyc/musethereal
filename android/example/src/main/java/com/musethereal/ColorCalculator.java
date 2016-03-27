@@ -3,6 +3,24 @@ import com.emotiv.insight.IEdk;
 
 import java.util.HashMap;
 import java.util.Random;
+
+/*
+LED to contact legend
+1  - AF4
+2  - T8
+3  - O2
+4  - O1
+5  - T7
+6  - AF3
+7  - F3
+8  - F8
+9  - FC6
+10 - P8
+11 - FC5
+12 - F7
+13 - P7
+ */
+
 /**
  * Created by kbrockman on 16-03-26.
  */
@@ -16,7 +34,13 @@ public class ColorCalculator {
     }
 
     public String ConvertToColors(HashMap<String, double[]> reading){
-
+        /*
+        0 - Theta
+        1 - Alpha
+        2 - Low beta
+        3 - High beta
+        4 - Gamma
+        */
 
         return EmptyString();
     }
