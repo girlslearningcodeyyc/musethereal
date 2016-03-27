@@ -32,7 +32,7 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
     private String debugTag = "MainActivity";
     private boolean startDress = false;
-    ColorCalculator colorCalculator = new ColorCalculator();
+    ColorCalculator colorCalculator;
     private boolean readyToTransmit;
 
     //UI Elements
@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
 
         //Set up EEG headset stuff
         setChannelList();
+
+        colorCalculator = new ColorCalculator(_channelList);
 
         //Set up BT manager
         final BluetoothManager bluetoothManager =

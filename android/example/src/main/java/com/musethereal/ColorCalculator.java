@@ -1,4 +1,6 @@
 package com.musethereal;
+import com.emotiv.insight.IEdk;
+
 import java.util.HashMap;
 import java.util.Random;
 /**
@@ -6,9 +8,11 @@ import java.util.Random;
  */
 public class ColorCalculator {
     private Random rando;
+    private HashMap<String, IEdk.IEE_DataChannel_t> channelList;
 
-    public ColorCalculator (){
+    public ColorCalculator (HashMap<String, IEdk.IEE_DataChannel_t> ch){
         rando = new Random();
+        channelList = ch;
     }
 
     public String ConvertToColors(HashMap<String, double[]> reading){
