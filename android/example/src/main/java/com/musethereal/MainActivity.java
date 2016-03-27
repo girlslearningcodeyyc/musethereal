@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //This handler will be passed to UsbService. Data received from serial port is displayed through this handler
-    private static class MyHandler extends Handler {
+    private class MyHandler extends Handler {
         private final WeakReference<MainActivity> mActivity;
 
         public MyHandler(MainActivity activity) {
@@ -177,7 +177,8 @@ public class MainActivity extends AppCompatActivity {
                 case UsbService.MESSAGE_FROM_SERIAL_PORT:
                     String data = (String) msg.obj;
                     mActivity.get().readyToTransmit = true;
-                    mActivity.get().writeToDisplay("ARDUINO: ready for transmission");
+                    new SendToScreen().execute("ARDUINO: ready for transmission");
+                    //mActivity.get().writeToDisplay("ARDUINO: ready for transmission");
                     break;
                 case UsbService.CTS_CHANGE:
                     Toast.makeText(mActivity.get(), "CTS_CHANGE", Toast.LENGTH_LONG).show();
