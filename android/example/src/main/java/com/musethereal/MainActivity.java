@@ -146,7 +146,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(debugTag, reading.values().toString());
 
                     //Run through color calculator
-                    String vals = colorCalculator.ConvertToColors(reading);
+                    String vals = colorCalculator.Random();
+                    //String vals = colorCalculator.ConvertToColors(reading);
 
                     //Send to dress controller
                     new SendToScreen().execute(vals);

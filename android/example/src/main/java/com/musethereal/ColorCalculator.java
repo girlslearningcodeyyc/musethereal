@@ -12,6 +12,16 @@ public class ColorCalculator {
     }
 
     public String ConvertToColors(HashMap<String, double[]> reading){
+
+
+        return EmptyString();
+    }
+
+    public String EmptyString(){
+        return "nnnnnnnnnnnnn";
+    }
+
+    public String Random() {
         String allcolors = "roygbcvpw";
         String s = "";
 
@@ -20,9 +30,5 @@ public class ColorCalculator {
         }
 
         return s;
-    }
-
-    public String EmptyString(){
-        return "nnnnnnnnnnnnn";
     }
 }
