@@ -1,4 +1,7 @@
 /*
+//This is example code provided by emotiv - Used for reference during development...
+
+
 package com.example.fftsample;
 
 import java.io.BufferedWriter;

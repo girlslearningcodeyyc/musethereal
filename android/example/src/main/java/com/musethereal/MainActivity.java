@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,23 +16,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.content.Intent;
-
-import com.emotiv.connectionmanager.ConnectionManager;
 import com.emotiv.insight.IEdk;
-import com.emotiv.insight.IEdkErrorCode;
 import com.emotiv.widget.ChooseHeadsetDialog;
 import com.felhr.serialportexample.UsbService;
-
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.widget.Toast;
-
-import com.emotiv.EEGHeadset;
-
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -84,35 +74,6 @@ public class MainActivity extends AppCompatActivity {
 
         //Connect to emoEngine
         IEdk.IEE_EngineConnect(this, "");
-//        Thread processingThread=new Thread()
-//        {
-//            @Override
-//            public void run() {
-//                // TODO Auto-generated method stub
-//                super.run();
-//                while(true)
-//                {
-//                    try
-//                    {
-//                        //handler.sendEmptyMessage(0);
-//                        //handler.sendEmptyMessage(1);
-////						if(isEnablGetData && isEnableWriteFile)handler.sendEmptyMessage(2);
-//                        if(ConnectionManager.isConnected){
-//                            Log.d(eegHeadset, "I'M CAPTURING DATA");
-//                            //TODO: only seems to hit case 2 in the handler...
-//                            handler.sendEmptyMessage(2);
-//                        }
-//                        Thread.sleep(1000);
-//                    }
-//
-//                    catch (Exception ex)
-//                    {
-//                        ex.printStackTrace();
-//                    }
-//                }
-//            }
-//        };
-//        processingThread.start();
     }
 
     @Override
@@ -191,8 +152,9 @@ public class MainActivity extends AppCompatActivity {
                     new SendToScreen().execute(vals);
                     usbService.write(vals.getBytes());
                 }
-                //Update UI
-                //Be careful with this - as the thread sleep goes down, this call spams the UI thread
+
+                //TODO: uncomment the transmit line here if youre debugging and you dont have a peripheral USB device responding with a ready to transmit byte
+                //readyToTransmit = true;
 
                 Thread.sleep(300);
             } catch (InterruptedException ex){
@@ -255,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case UsbService.MESSAGE_FROM_SERIAL_PORT:
-                    String data = (String) msg.obj;
+                    //TODO: any return data is a ready to transmit byte - change this logic if you want to refine the android/arduino interaction
                     mActivity.get().readyToTransmit = true;;
                     break;
                 case UsbService.CTS_CHANGE:
@@ -308,11 +270,13 @@ public class MainActivity extends AppCompatActivity {
     //endregion
 
     //region EEG Headset
+
     private String eegHeadset = "eegHeadset";
 
     private HashMap<String, IEdk.IEE_DataChannel_t> _channelList;
+
     private void setChannelList() {
-        _channelList = new HashMap<String, IEdk.IEE_DataChannel_t>();
+        _channelList = new HashMap<>();
         _channelList.put("AF3", IEdk.IEE_DataChannel_t.IED_AF3);
         _channelList.put("T7", IEdk.IEE_DataChannel_t.IED_T7);
         _channelList.put("Pz", IEdk.IEE_DataChannel_t.IED_Pz);
@@ -332,23 +296,6 @@ public class MainActivity extends AppCompatActivity {
 
     private BluetoothAdapter mBluetoothAdapter;
     private static final int REQUEST_ENABLE_BT = 1;
-
-    Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            for(String key : _channelList.keySet())
-            {
-                double[] data = IEdk.IEE_GetAverageBandPowers(_channelList.get(key));
-                if(data != null && data.length == 5){
-                    Log.d(eegHeadset, key + ",");
-                    for(int j=0; j < data.length;j++)
-                        Log.d(eegHeadset, String.valueOf(data[j]));
-                }
-            }
-
-        }
-
-    };
 
     //endregion
 }

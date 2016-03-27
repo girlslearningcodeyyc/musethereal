@@ -1,4 +1,7 @@
 /*
+
+//This is example code provided by felhr - Used for reference during development...
+
 package com.felhr.serialportexample;
 
 import android.content.BroadcastReceiver;
