@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -31,6 +32,8 @@ import com.emotiv.EEGHeadset;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -54,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Online", "Goliath Online");
 
         //Set up EEG headset stuff
+        setChannelList();
+
         //Set up BT manager
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -79,34 +84,35 @@ public class MainActivity extends AppCompatActivity {
 
         //Connect to emoEngine
         IEdk.IEE_EngineConnect(this, "");
-        Thread processingThread=new Thread()
-        {
-            @Override
-            public void run() {
-                // TODO Auto-generated method stub
-                super.run();
-                while(true)
-                {
-                    try
-                    {
-                        //handler.sendEmptyMessage(0);
-                        //handler.sendEmptyMessage(1);
-//						if(isEnablGetData && isEnableWriteFile)handler.sendEmptyMessage(2);
-                        if(ConnectionManager.isConnected){
-                            //TODO: only seems to hit case 2 in the handler...
-                            handler.sendEmptyMessage(2);
-                        }
-                        Thread.sleep(5);
-                    }
-
-                    catch (Exception ex)
-                    {
-                        ex.printStackTrace();
-                    }
-                }
-            }
-        };
-        processingThread.start();
+//        Thread processingThread=new Thread()
+//        {
+//            @Override
+//            public void run() {
+//                // TODO Auto-generated method stub
+//                super.run();
+//                while(true)
+//                {
+//                    try
+//                    {
+//                        //handler.sendEmptyMessage(0);
+//                        //handler.sendEmptyMessage(1);
+////						if(isEnablGetData && isEnableWriteFile)handler.sendEmptyMessage(2);
+//                        if(ConnectionManager.isConnected){
+//                            Log.d(eegHeadset, "I'M CAPTURING DATA");
+//                            //TODO: only seems to hit case 2 in the handler...
+//                            handler.sendEmptyMessage(2);
+//                        }
+//                        Thread.sleep(1000);
+//                    }
+//
+//                    catch (Exception ex)
+//                    {
+//                        ex.printStackTrace();
+//                    }
+//                }
+//            }
+//        };
+//        processingThread.start();
     }
 
     @Override
@@ -170,9 +176,16 @@ public class MainActivity extends AppCompatActivity {
                     readyToTransmit = false;
 
                     //Get reading from headset
+                    HashMap<String, double[]> reading = new HashMap<>();
+                    for(String key : _channelList.keySet())
+                        reading.put(key, IEdk.IEE_GetAverageBandPowers(_channelList.get(key)));
+
+                    Log.d(debugTag, "After reading");
+                    Log.d(debugTag, reading.keySet().toString());
+                    Log.d(debugTag, reading.values().toString());
 
                     //Run through color calculator
-                    String vals = colorCalculator.ConvertToColors(null);
+                    String vals = colorCalculator.ConvertToColors(reading);
 
                     //Send to dress controller
                     new SendToScreen().execute(vals);
@@ -296,38 +309,26 @@ public class MainActivity extends AppCompatActivity {
 
     //region EEG Headset
     private String eegHeadset = "eegHeadset";
-    IEdk.IEE_DataChannel_t[] Channel_list = {
-            IEdk.IEE_DataChannel_t.IED_AF3,
-            IEdk.IEE_DataChannel_t.IED_T7,
-            IEdk.IEE_DataChannel_t.IED_Pz,
-            IEdk.IEE_DataChannel_t.IED_T8,
-            IEdk.IEE_DataChannel_t.IED_AF4,
-            IEdk.IEE_DataChannel_t.IED_O2,
-            IEdk.IEE_DataChannel_t.IED_F7,
-            IEdk.IEE_DataChannel_t.IED_P8,
-            IEdk.IEE_DataChannel_t.IED_F3,
-            IEdk.IEE_DataChannel_t.IED_FC5,
-            IEdk.IEE_DataChannel_t.IED_FC6,
-            IEdk.IEE_DataChannel_t.IED_F4,
-            IEdk.IEE_DataChannel_t.IED_P7,
-            IEdk.IEE_DataChannel_t.IED_F8,
-            IEdk.IEE_DataChannel_t.IED_O1};
-    String[] Name_Channel = {
-            "AF3",
-            "T7",
-            "Pz",
-            "T8",
-            "AF4",
-            "O2",
-            "F7",
-            "P8",
-            "F3",
-            "FC5",
-            "FC6",
-            "F4",
-            "P7",
-            "F8",
-            "O1"};
+
+    private HashMap<String, IEdk.IEE_DataChannel_t> _channelList;
+    private void setChannelList() {
+        _channelList = new HashMap<String, IEdk.IEE_DataChannel_t>();
+        _channelList.put("AF3", IEdk.IEE_DataChannel_t.IED_AF3);
+        _channelList.put("T7", IEdk.IEE_DataChannel_t.IED_T7);
+        _channelList.put("Pz", IEdk.IEE_DataChannel_t.IED_Pz);
+        _channelList.put("T8", IEdk.IEE_DataChannel_t.IED_T8);
+        _channelList.put("AF4", IEdk.IEE_DataChannel_t.IED_AF4);
+        _channelList.put("O2", IEdk.IEE_DataChannel_t.IED_O2);
+        _channelList.put("F7", IEdk.IEE_DataChannel_t.IED_F7);
+        _channelList.put("P8", IEdk.IEE_DataChannel_t.IED_P8);
+        _channelList.put("F3", IEdk.IEE_DataChannel_t.IED_F3);
+        _channelList.put("FC5", IEdk.IEE_DataChannel_t.IED_FC5);
+        _channelList.put("FC6", IEdk.IEE_DataChannel_t.IED_FC6);
+        _channelList.put("F4", IEdk.IEE_DataChannel_t.IED_F4);
+        _channelList.put("P7", IEdk.IEE_DataChannel_t.IED_P7);
+        _channelList.put("F8", IEdk.IEE_DataChannel_t.IED_F8);
+        _channelList.put("O1", IEdk.IEE_DataChannel_t.IED_O1);
+    }
 
     private BluetoothAdapter mBluetoothAdapter;
     private static final int REQUEST_ENABLE_BT = 1;
@@ -335,11 +336,11 @@ public class MainActivity extends AppCompatActivity {
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            for(int i=0; i < Channel_list.length; i++)
+            for(String key : _channelList.keySet())
             {
-                double[] data = IEdk.IEE_GetAverageBandPowers(Channel_list[i]);
+                double[] data = IEdk.IEE_GetAverageBandPowers(_channelList.get(key));
                 if(data != null && data.length == 5){
-                    Log.d(eegHeadset, Name_Channel[i] + ",");
+                    Log.d(eegHeadset, key + ",");
                     for(int j=0; j < data.length;j++)
                         Log.d(eegHeadset, String.valueOf(data[j]));
                 }

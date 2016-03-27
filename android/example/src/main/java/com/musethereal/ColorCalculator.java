@@ -1,4 +1,5 @@
 package com.musethereal;
+import java.util.HashMap;
 import java.util.Random;
 /**
  * Created by kbrockman on 16-03-26.
@@ -10,7 +11,7 @@ public class ColorCalculator {
         rando = new Random();
     }
 
-    public String ConvertToColors(EEGReading reading){
+    public String ConvertToColors(HashMap<String, double[]> reading){
         String allcolors = "roygbcvpw";
         String s = "";
 
