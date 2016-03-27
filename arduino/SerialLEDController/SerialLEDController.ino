@@ -6,11 +6,8 @@
 #include <avr/power.h>
 #endif
 
-// Set up first array of LEDs
-#define ARRAY1PIN         6
-//13 channels - 13 dress LEDs 
-//3 bytes per channel - one for R, one for G, one for B
-#define DRESSLEDARRAYLENGTH 13
+#define ARRAY1PIN         6    
+#define DRESSLEDARRAYLENGTH 13 //13 channels - 13 dress LEDs 
 #define RED     0xFF0000
 #define ORANGE  0xFF7000
 #define YELLOW  0xFFFF00
@@ -20,10 +17,11 @@
 #define VIOLET  0x7000FF
 #define PINK    0xFF00FF
 #define WHITE   0xFFFFFF
+#define NONE    0x000000
 uint32_t currentColors [DRESSLEDARRAYLENGTH];
 uint32_t targetColors [DRESSLEDARRAYLENGTH];
-int stepMax = 30;
-int stepTime = 50;
+int stepMax = 15;
+int stepTime = 20;
 bool readyToRead = true;
 Adafruit_NeoPixel array1 = Adafruit_NeoPixel(DRESSLEDARRAYLENGTH, ARRAY1PIN, NEO_GRB + NEO_KHZ800);
 
@@ -113,7 +111,7 @@ uint32_t convertToColor(char c) {
     case 'v': return VIOLET;
     case 'p': return PINK;
     case 'w': return WHITE;
-    default:  return 0x000000;
+    default:  return NONE;
   }
 }
 

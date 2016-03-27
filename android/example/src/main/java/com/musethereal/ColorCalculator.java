@@ -1,26 +1,27 @@
 package com.musethereal;
-
+import java.util.Random;
 /**
  * Created by kbrockman on 16-03-26.
  */
 public class ColorCalculator {
-    private byte[] currentColors = new byte[]{
-            (byte) 0xFF, (byte) 0x00, (byte) 0x00,  // 0 - AF4
-            (byte) 0x00, (byte) 0xFF, (byte) 0x00,  // 1 - T8
-            (byte) 0x00, (byte) 0x00, (byte) 0xFF,  // 2 - O2
-            (byte) 0xFF, (byte) 0xFF, (byte) 0x00,  // 3 - O1
-            (byte) 0x00, (byte) 0xFF, (byte) 0xFF,  // 4 - T7
-            (byte) 0xFF, (byte) 0x00, (byte) 0xFF,  // 5 - AF6
-            (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,  // 6 - F3
-            (byte) 0xFF, (byte) 0x99, (byte) 0x00,  // 7 - F8
-            (byte) 0x99, (byte) 0x00, (byte) 0xFF,  // 8 - FC6
-            (byte) 0x00, (byte) 0x00, (byte) 0x00,  // 9 - P8
-            (byte) 0x00, (byte) 0x00, (byte) 0x00,  // 10 - FC5
-            (byte) 0x00, (byte) 0x00, (byte) 0x00,  // 11 - F7
-            (byte) 0x00, (byte) 0x00, (byte) 0x00  // 12 - P7
-    };
+    private Random rando;
 
-    public byte[] ConvertToColors(EEGReading reading){
-        return currentColors;
+    public ColorCalculator (){
+        rando = new Random();
+    }
+
+    public String ConvertToColors(EEGReading reading){
+        String allcolors = "roygbcvpw";
+        String s = "";
+
+        for(int i = 0; i < 13 ; i++) {
+            s = s + allcolors.charAt(rando.nextInt(allcolors.length()));
+        }
+
+        return s;
+    }
+
+    public String EmptyString(){
+        return "nnnnnnnnnnnnn";
     }
 }

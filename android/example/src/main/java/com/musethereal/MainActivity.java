@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                 String buttonText = startDress ? "Off" : "On";
                 sendButton.setText(buttonText);
 
-                Thread thr = new Thread(){
+                Thread thr = new Thread() {
                     @Override
                     public void run() {
                         StartSequence();
@@ -97,32 +97,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void StartSequence()  {
+        readyToTransmit = true;
         while(startDress){
 
             try{
-                //Get reading from headset
-
-                //Run through color calculator
-                byte[] vals = colorCalculator.ConvertToColors(null);
-
-                //Send to dress controller
-                //Log.d(debugTag, "Write to dress:\n" + (int) vals[0]);
                 if (usbService != null && readyToTransmit) {
                     readyToTransmit = false;
-                    new SendToScreen().execute("ANDROID: transmit");
-                    usbService.write(vals);
-                } else
-                    new SendToScreen().execute("ANDROID: CANT TRANSIT");
 
+                    //Get reading from headset
+
+                    //Run through color calculator
+                    String vals = colorCalculator.ConvertToColors(null);
+
+                    //Send to dress controller
+                    new SendToScreen().execute(vals);
+                    usbService.write(vals.getBytes());
+                }
                 //Update UI
                 //Be careful with this - as the thread sleep goes down, this call spams the UI thread
 
-
-                Thread.sleep(500);
+                Thread.sleep(300);
             } catch (InterruptedException ex){
                 Log.d(debugTag, "Error in running: " + ex.getMessage());
             }
 
+        }
+
+        if (!startDress && usbService != null){
+            usbService.write(colorCalculator.EmptyString().getBytes());
         }
     }
 
@@ -176,9 +178,7 @@ public class MainActivity extends AppCompatActivity {
             switch (msg.what) {
                 case UsbService.MESSAGE_FROM_SERIAL_PORT:
                     String data = (String) msg.obj;
-                    mActivity.get().readyToTransmit = true;
-                    new SendToScreen().execute("ARDUINO: ready for transmission");
-                    //mActivity.get().writeToDisplay("ARDUINO: ready for transmission");
+                    mActivity.get().readyToTransmit = true;;
                     break;
                 case UsbService.CTS_CHANGE:
                     Toast.makeText(mActivity.get(), "CTS_CHANGE", Toast.LENGTH_LONG).show();
