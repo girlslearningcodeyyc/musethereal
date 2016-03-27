@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean startDress = false;
     private TextView display;
     ColorCalculator colorCalculator = new ColorCalculator();
+    private boolean readyToTransmit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         final Button sendButton = (Button) findViewById(R.id.buttonOn);
         display = (TextView) findViewById(R.id.textView1);
+        mHandler = new MyHandler(this);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -105,15 +107,18 @@ public class MainActivity extends AppCompatActivity {
 
                 //Send to dress controller
                 //Log.d(debugTag, "Write to dress:\n" + (int) vals[0]);
-                if (usbService != null) {
+                if (usbService != null && readyToTransmit) {
+                    readyToTransmit = false;
+                    new SendToScreen().execute("ANDROID: transmit");
                     usbService.write(vals);
-                }
+                } else
+                    new SendToScreen().execute("ANDROID: CANT TRANSIT");
 
                 //Update UI
                 //Be careful with this - as the thread sleep goes down, this call spams the UI thread
-                new SendCalculationToScreen().execute("You can't stop me\r\n");
 
-                Thread.sleep(1000);
+
+                Thread.sleep(500);
             } catch (InterruptedException ex){
                 Log.d(debugTag, "Error in running: " + ex.getMessage());
             }
@@ -122,15 +127,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //See: http://developer.android.com/guide/components/processes-and-threads.html
-    private class SendCalculationToScreen extends AsyncTask<String, Void, String> {
+    private class SendToScreen extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... params) {
             return params[0];
         }
 
         protected void onPostExecute(String result){
-            display.setText(result);
+            writeToDisplay(result);
         }
+    }
+
+    private void writeToDisplay(String text){
+        display.setText(text + "\n" + display.getText());
     }
 
     //region USB Service
@@ -167,7 +176,8 @@ public class MainActivity extends AppCompatActivity {
             switch (msg.what) {
                 case UsbService.MESSAGE_FROM_SERIAL_PORT:
                     String data = (String) msg.obj;
-                    //mActivity.get().display.append(data);
+                    mActivity.get().readyToTransmit = true;
+                    mActivity.get().writeToDisplay("ARDUINO: ready for transmission");
                     break;
                 case UsbService.CTS_CHANGE:
                     Toast.makeText(mActivity.get(), "CTS_CHANGE", Toast.LENGTH_LONG).show();
