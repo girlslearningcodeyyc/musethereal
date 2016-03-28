@@ -14,7 +14,7 @@
 #define GREEN   0x00FF00
 #define CYAN    0x00FFFF
 #define BLUE    0x0000FF
-#define VIOLET  0x7000FF
+#define VIOLET  0x5000FF
 #define PINK    0xFF00FF
 #define WHITE   0xFFFFFF
 #define NONE    0x000000
