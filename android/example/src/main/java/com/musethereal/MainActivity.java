@@ -23,7 +23,6 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.widget.Toast;
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -84,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         final Button startButton = (Button) findViewById(R.id.buttonOn);
         display = (TextView) findViewById(R.id.textView1);
-        mHandler = new MyHandler(this);
+        mHandler = new USBSerialReceiveHandler(this);
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -131,15 +130,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void StartSequence()  {
+        //Set readyToTransmit bit so we get into the loop the first time
         readyToTransmit = true;
-        while(startDress){
 
+        while(startDress){
             try{
+                //Only transmit when the USBService is active and readyToTransmit byte has been received
                 if (usbService != null && readyToTransmit) {
+                    //Set to false manually (TODO: this should be part of the USBService)
                     readyToTransmit = false;
 
                     //Get reading from headset
-                    double[][] reading = new double[_channelList.length][5];
+                    double[][] reading = new double[_channelList.length][5]; //1st Dimension - the channel, 2nd Dimension = frequency band
                     boolean readingIsNull = false;
                     for(int i = 0; i < _channelList.length; i++) {
                         double[] f = IEdk.IEE_GetAverageBandPowers(_channelList[i]);
@@ -157,15 +159,11 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
 
-//                    Log.d(debugTag, "After reading");
-//                    Log.d(debugTag, reading.keySet().toString());
-//                    Log.d(debugTag, reading.values().toString());
-
-                    //Run through color calculator
                     if(!readingIsNull) {
+                        //Run through color calculator
                         String vals = colorCalculator.ConvertToColors(reading);
 
-                        //Send to dress controller
+                        //Send to dress controller, show on screen
                         new SendToScreen().execute(vals);
                         usbService.write(vals.getBytes());
                     }
@@ -175,10 +173,9 @@ public class MainActivity extends AppCompatActivity {
                 //readyToTransmit = true;
 
                 Thread.sleep(10);
-            } catch (InterruptedException ex){
-                Log.d(debugTag, "Error in running: " + ex.getMessage());
+            } catch (Exception ex){
+                new SendToScreen().execute("Error in running: " + ex.getMessage());
             }
-
         }
 
         if (!startDress && usbService != null){
@@ -205,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
     //region USB Service
 
     private UsbService usbService;
-    private MyHandler mHandler;
+    private USBSerialReceiveHandler mHandler;
 
     private void startService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
         if (!UsbService.SERVICE_CONNECTED) {
@@ -223,11 +220,24 @@ public class MainActivity extends AppCompatActivity {
         bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
+    private final ServiceConnection usbConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
+            usbService = ((UsbService.UsbBinder) arg1).getService();
+            usbService.setHandler(mHandler);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            usbService = null;
+        }
+    };
+
     //This handler will be passed to UsbService. Data received from serial port is displayed through this handler
-    private class MyHandler extends Handler {
+    private class USBSerialReceiveHandler extends Handler {
         private final WeakReference<MainActivity> mActivity;
 
-        public MyHandler(MainActivity activity) {
+        public USBSerialReceiveHandler(MainActivity activity) {
             mActivity = new WeakReference<>(activity);
         }
 
@@ -247,19 +257,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-    private final ServiceConnection usbConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
-            usbService = ((UsbService.UsbBinder) arg1).getService();
-            usbService.setHandler(mHandler);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            usbService = null;
-        }
-    };
 
     //Notifications from UsbService will be received here.
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
