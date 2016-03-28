@@ -34,6 +34,8 @@ public class ColorCalculator {
     }
 
     public String ConvertToColors(double[][] reading){
+        //Logic here is essentially...grab the channel with the highest intensity and show the color associated with it below
+
         /*
         0 - Theta
         1 - Alpha
@@ -43,11 +45,11 @@ public class ColorCalculator {
         */
 
         char[] colormap = new char[5];
-        colormap[0] = 'g';
-        colormap[1] = 'b';
-        colormap[2] = 'r';
-        colormap[3] = 'y';
-        colormap[4] = 'v';
+        colormap[0] = 'g'; //green
+        colormap[1] = 'b'; //blue
+        colormap[2] = 'r'; //red
+        colormap[3] = 'y'; //yellow
+        colormap[4] = 'v'; //violet
 
         String returnString = "";
 

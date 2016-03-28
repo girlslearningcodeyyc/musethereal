@@ -143,10 +143,17 @@ public class MainActivity extends AppCompatActivity {
                     boolean readingIsNull = false;
                     for(int i = 0; i < _channelList.length; i++) {
                         double[] f = IEdk.IEE_GetAverageBandPowers(_channelList[i]);
-                        Log.d(debugTag, i + ": with data :" + f.toString());
 
-                        for (int j = 0; j < f.length; j++){
-                            reading[i][j] = f[j];
+                        //sometimes reading is empty - in which case just ignore and just reloop cause we cant do anything with them anyways
+                        readingIsNull = f == null || f.length == 0;
+
+                        if (!readingIsNull) {
+                            for (int j = 0; j < f.length; j++) {
+                                reading[i][j] = f[j];
+                            }
+                        } else {
+                            //give up, we dont have a full record so just abandon and keep going
+                            break;
                         }
                     }
 
@@ -155,16 +162,17 @@ public class MainActivity extends AppCompatActivity {
 //                    Log.d(debugTag, reading.values().toString());
 
                     //Run through color calculator
-                    //String vals = colorCalculator.Random();
-                    String vals = colorCalculator.ConvertToColors(reading);
+                    if(!readingIsNull) {
+                        String vals = colorCalculator.ConvertToColors(reading);
 
-                    //Send to dress controller
-                    new SendToScreen().execute(vals);
-                    usbService.write(vals.getBytes());
+                        //Send to dress controller
+                        new SendToScreen().execute(vals);
+                        usbService.write(vals.getBytes());
+                    }
                 }
 
                 //TODO: uncomment the transmit line here if youre debugging and you dont have a peripheral USB device responding with a ready to transmit byte
-                readyToTransmit = true;
+                //readyToTransmit = true;
 
                 Thread.sleep(300);
             } catch (InterruptedException ex){
