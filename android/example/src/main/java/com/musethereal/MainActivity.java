@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
                 //TODO: uncomment the transmit line here if youre debugging and you dont have a peripheral USB device responding with a ready to transmit byte
                 //readyToTransmit = true;
 
-                Thread.sleep(300);
+                Thread.sleep(10);
             } catch (InterruptedException ex){
                 Log.d(debugTag, "Error in running: " + ex.getMessage());
             }
