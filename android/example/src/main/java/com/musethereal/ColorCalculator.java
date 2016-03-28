@@ -26,14 +26,14 @@ LED to contact legend
  */
 public class ColorCalculator {
     private Random rando;
-    private HashMap<String, IEdk.IEE_DataChannel_t> channelList;
+    private IEdk.IEE_DataChannel_t [] channelList;
 
-    public ColorCalculator (HashMap<String, IEdk.IEE_DataChannel_t> ch){
+    public ColorCalculator (IEdk.IEE_DataChannel_t [] ch){
         rando = new Random();
         channelList = ch;
     }
 
-    public String ConvertToColors(HashMap<String, double[]> reading){
+    public String ConvertToColors(double[][] reading){
         /*
         0 - Theta
         1 - Alpha
@@ -42,7 +42,25 @@ public class ColorCalculator {
         4 - Gamma
         */
 
-        return EmptyString();
+        char[] colormap = new char[5];
+        colormap[0] = 'g';
+        colormap[1] = 'b';
+        colormap[2] = 'r';
+        colormap[3] = 'y';
+        colormap[4] = 'v';
+
+        String returnString = "";
+
+        for (int i = 0; i < channelList.length ; i++){
+            int dominantChannel = 0;
+            for (int j = 1; j < 5; j++){
+                if (reading[i][j] > reading[i][j-1])
+                    dominantChannel = j;
+            }
+            returnString = returnString + colormap[dominantChannel];
+        }
+
+        return returnString;
     }
 
     public String EmptyString(){

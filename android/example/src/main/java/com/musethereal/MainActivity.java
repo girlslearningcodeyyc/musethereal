@@ -139,17 +139,24 @@ public class MainActivity extends AppCompatActivity {
                     readyToTransmit = false;
 
                     //Get reading from headset
-                    HashMap<String, double[]> reading = new HashMap<>();
-                    for(String key : _channelList.keySet())
-                        reading.put(key, IEdk.IEE_GetAverageBandPowers(_channelList.get(key)));
+                    double[][] reading = new double[_channelList.length][5];
+                    boolean readingIsNull = false;
+                    for(int i = 0; i < _channelList.length; i++) {
+                        double[] f = IEdk.IEE_GetAverageBandPowers(_channelList[i]);
+                        Log.d(debugTag, i + ": with data :" + f.toString());
 
-                    Log.d(debugTag, "After reading");
-                    Log.d(debugTag, reading.keySet().toString());
-                    Log.d(debugTag, reading.values().toString());
+                        for (int j = 0; j < f.length; j++){
+                            reading[i][j] = f[j];
+                        }
+                    }
+
+//                    Log.d(debugTag, "After reading");
+//                    Log.d(debugTag, reading.keySet().toString());
+//                    Log.d(debugTag, reading.values().toString());
 
                     //Run through color calculator
-                    String vals = colorCalculator.Random();
-                    //String vals = colorCalculator.ConvertToColors(reading);
+                    //String vals = colorCalculator.Random();
+                    String vals = colorCalculator.ConvertToColors(reading);
 
                     //Send to dress controller
                     new SendToScreen().execute(vals);
@@ -157,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 //TODO: uncomment the transmit line here if youre debugging and you dont have a peripheral USB device responding with a ready to transmit byte
-                //readyToTransmit = true;
+                readyToTransmit = true;
 
                 Thread.sleep(300);
             } catch (InterruptedException ex){
@@ -276,25 +283,24 @@ public class MainActivity extends AppCompatActivity {
 
     private String eegHeadset = "eegHeadset";
 
-    private HashMap<String, IEdk.IEE_DataChannel_t> _channelList;
+    private IEdk.IEE_DataChannel_t [] _channelList;
 
     private void setChannelList() {
-        _channelList = new HashMap<>();
-        _channelList.put("AF3", IEdk.IEE_DataChannel_t.IED_AF3);
-        _channelList.put("T7", IEdk.IEE_DataChannel_t.IED_T7);
-        _channelList.put("Pz", IEdk.IEE_DataChannel_t.IED_Pz);
-        _channelList.put("T8", IEdk.IEE_DataChannel_t.IED_T8);
-        _channelList.put("AF4", IEdk.IEE_DataChannel_t.IED_AF4);
-        _channelList.put("O2", IEdk.IEE_DataChannel_t.IED_O2);
-        _channelList.put("F7", IEdk.IEE_DataChannel_t.IED_F7);
-        _channelList.put("P8", IEdk.IEE_DataChannel_t.IED_P8);
-        _channelList.put("F3", IEdk.IEE_DataChannel_t.IED_F3);
-        _channelList.put("FC5", IEdk.IEE_DataChannel_t.IED_FC5);
-        _channelList.put("FC6", IEdk.IEE_DataChannel_t.IED_FC6);
-        _channelList.put("F4", IEdk.IEE_DataChannel_t.IED_F4);
-        _channelList.put("P7", IEdk.IEE_DataChannel_t.IED_P7);
-        _channelList.put("F8", IEdk.IEE_DataChannel_t.IED_F8);
-        _channelList.put("O1", IEdk.IEE_DataChannel_t.IED_O1);
+        _channelList = new IEdk.IEE_DataChannel_t[] {
+            IEdk.IEE_DataChannel_t.IED_AF4,
+            IEdk.IEE_DataChannel_t.IED_T8,
+            IEdk.IEE_DataChannel_t.IED_O2,
+            IEdk.IEE_DataChannel_t.IED_O1,
+            IEdk.IEE_DataChannel_t.IED_T7,
+            IEdk.IEE_DataChannel_t.IED_AF3,
+            IEdk.IEE_DataChannel_t.IED_F3,
+            IEdk.IEE_DataChannel_t.IED_F8,
+            IEdk.IEE_DataChannel_t.IED_FC6,
+            IEdk.IEE_DataChannel_t.IED_P8,
+            IEdk.IEE_DataChannel_t.IED_FC5,
+            IEdk.IEE_DataChannel_t.IED_F7,
+            IEdk.IEE_DataChannel_t.IED_P7,
+        };
     }
 
     private BluetoothAdapter mBluetoothAdapter;
