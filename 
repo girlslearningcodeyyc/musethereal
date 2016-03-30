@@ -1,0 +1,16 @@
+"
+Added hi tag"
+
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# Committer: Nadkina <ksenia.nadkina@honeywell.com>
+
+# On branch master
+# Your branch is up-to-date with 'origin/master'.
+#
+# Changes to be committed:
+#	modified:   README.md
+#	new file:   arduino/Appliques_final/Appliques_final.ino
+#	new file:   arduino/Appliques_final/WS2812_Definitions.h
+#	modified:   arduino/RGD_LED_Accelerometer/RGD_LED_Accelerometer.ino
+#

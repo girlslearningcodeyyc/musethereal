@@ -5,14 +5,7 @@
   
   Requires the Adafruit NeoPixel library. It's awesome, go get it.
   https://github.com/adafruit/Adafruit_NeoPixel
-  
-  This simple example code runs three sets of animations on a group of WS2812
-  breakout boards. The more boards you link up, the better these animations
-  will look. 
-  
-  For help linking WS2812 breakouts, checkout our hookup guide:
-  https://learn.sparkfun.com/tutorials/ws2812-breakout-hookup-guide
-  
+   
   Before uploading the code, make sure you adjust the two defines at the
   top of this sketch: PIN and LED_COUNT. Pin should be the Arduino pin
   you've got connected to the first pixel's DIN pin. By default it's
@@ -23,11 +16,11 @@
 #include "WS2812_Definitions.h"
 
 #define PIN1 3
-#define LED_COUNT1 5
+#define LED_COUNT1 21
 #define PIN2 5
-#define LED_COUNT2 5
+#define LED_COUNT2 21
 #define PIN3 6
-#define LED_COUNT3 5
+#define LED_COUNT3 22
 
 // Create an instance of the Adafruit_NeoPixel class called "XPin", "YPin" and "ZPin".
 // That'll be what we refer to from here on...
@@ -58,25 +51,53 @@ void loop()
    analogValueX = analogRead(sensorPinX);
    analogValueY = analogRead(sensorPinY);
    analogValueZ = analogRead(sensorPinZ);
-   if ((analogValueX > 400) || (analogValueY > 400) || (analogValueZ > 400) )
-   {
    
-  // A light shower of spring green rain
-  // This will run the cascade from top->bottom i times
-  for (int i=0; i<1; i++)
-  {
-    // First parameter is the color, second is direction, third is ms between falls
-    cascade(MEDIUMSPRINGGREEN, TOP_DOWN, 100); 
-  }
+   if (analogValueX > 400) //the value which is an average between no movement of the accelerometer and some change in position for the x-axis
+   {   
+        // A light shower of light sky blue
+        // This will run the cascade from top->bottom i times
+        for (int i=0; i<1; i++)
+        {
+          // First parameter is the color, second is direction, third is ms between falls
+          cascade1(LIGHTSKYBLUE, TOP_DOWN, 25); 
+        }
    }
    else
+         {
+           clearLEDs(); // Turn all LEDs off
+         }
+   if (analogValueY > 400) //the value which is an average between no movement of the accelerometer and some change in position for the y-axis
    {
-     clearLEDs(); // Turn all LEDs off
+          // A light shower of light sky blue
+          // This will run the cascade from top->bottom i times
+          for (int i=0; i<1; i++)
+          {
+            // First parameter is the color, second is direction, third is ms between falls
+            cascade2(LIGHTSKYBLUE, TOP_DOWN, 25); 
+          }
    }
+   else
+         {
+           clearLEDs(); // Turn all LEDs off
+         }
+   if (analogValueZ > 400) //the value which is an average between no movement of the accelerometer and some change in position for the z-axis
+   {
+        // A light shower of light sky blue
+        // This will run the cascade from top->bottom i times
+        for (int i=0; i<1; i++)
+        {
+          // First parameter is the color, second is direction, third is ms between falls
+          cascade3(LIGHTSKYBLUE, TOP_DOWN, 25); 
+        }
+   }
+   else
+         {
+           clearLEDs(); // Turn all LEDs off
+         }
 }
 
 // Cascades a single direction. One time.
-void cascade(unsigned long color, byte direction, byte wait)
+void cascade1(unsigned long color, byte direction, byte wait)
 {
   if (direction == TOP_DOWN)
   {
@@ -87,23 +108,8 @@ void cascade(unsigned long color, byte direction, byte wait)
       XPin.show();
       delay(wait);
     }
-    
-    for (int i=0; i<LED_COUNT2; i++)
-    {
-      clearLEDs();  // Turn off all LEDs
-      YPin.setPixelColor(i, color);  // Set just this one
-      YPin.show();
-      delay(wait);
-    }
-    for (int i=0; i<LED_COUNT3; i++)
-    {
-      clearLEDs();  // Turn off all LEDs
-      ZPin.setPixelColor(i, color);  // Set just this one
-      ZPin.show();
-      delay(wait);
-    }
   }
-  else
+    else
   {
     for (int i=LED_COUNT1-1; i>=0; i--)
     {
@@ -112,19 +118,51 @@ void cascade(unsigned long color, byte direction, byte wait)
       XPin.show();
       delay(wait);
     }
-    
-    for (int i=LED_COUNT2-1; i>=0; i--)
+  }
+}
+
+void cascade2(unsigned long color, byte direction, byte wait)
+{
+  if (direction == TOP_DOWN)
+  {
+    for (int i=0; i<LED_COUNT2; i++)
+    {
+      clearLEDs();  // Turn off all LEDs
+      YPin.setPixelColor(i, color);  // Set just this one
+      YPin.show();
+      delay(wait);
+    }
+  }
+      else
+  {
+        for (int i=LED_COUNT2-1; i>=0; i--)
     {
       clearLEDs();
       YPin.setPixelColor(i, color);
       YPin.show();
       delay(wait);
     }
-    
-    for (int i=LED_COUNT3-1; i>=0; i--)
+  }
+}
+  
+ void cascade3(unsigned long color, byte direction, byte wait)
+{
+  if (direction == TOP_DOWN)
+  {
+    for (int i=0; i<LED_COUNT3; i++)
     {
       clearLEDs();
       ZPin.setPixelColor(i, color);
+      ZPin.show();
+      delay(wait);
+    }
+  }
+  else{
+    
+   for (int i=LED_COUNT3-1; i>=0; i--)
+    {
+      clearLEDs();  // Turn off all LEDs
+      ZPin.setPixelColor(i, color);  // Set just this one
       ZPin.show();
       delay(wait);
     }
