@@ -45,11 +45,11 @@ public class ColorCalculator {
         */
 
         char[] colormap = new char[5];
-        colormap[0] = 'g'; //green
+        colormap[0] = 'v'; //violet
         colormap[1] = 'b'; //blue
-        colormap[2] = 'r'; //red
+        colormap[2] = 'g'; //green
         colormap[3] = 'y'; //yellow
-        colormap[4] = 'v'; //violet
+        colormap[4] = 'r'; //red
 
         String returnString = "";
 
