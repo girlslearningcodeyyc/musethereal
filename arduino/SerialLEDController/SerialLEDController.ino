@@ -7,6 +7,7 @@
 #endif
 
 #define ARRAY1PIN         6    
+#define ARRAY2PIN         7
 #define DRESSLEDARRAYLENGTH 13 //13 channels - 13 dress LEDs 
 #define RED     0xFF0000
 #define ORANGE  0xFF7000
@@ -18,21 +19,29 @@
 #define PINK    0xFF00FF
 #define WHITE   0xFFFFFF
 #define NONE    0x000000
-uint32_t currentColors [DRESSLEDARRAYLENGTH];
-uint32_t targetColors [DRESSLEDARRAYLENGTH];
+uint32_t currentChestColors [DRESSLEDARRAYLENGTH];
+uint32_t targetChestColors [DRESSLEDARRAYLENGTH];
+uint32_t currentAxonColor;
+uint32_t targetAxonColor;
 int stepMax = 15;   //The number of steps to do a fade across
 int stepTime = 20;  //The number of milliseconds to pause at each step in the fade
 bool readyToRead = true;
 Adafruit_NeoPixel array1 = Adafruit_NeoPixel(DRESSLEDARRAYLENGTH, ARRAY1PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel axon = Adafruit_NeoPixel(1, ARRAY2PIN, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   Serial.begin(9600);
+  axon.begin();
   array1.begin();
 
-  //Initialize current color array to be blank
+  //Initialize current colors to be blank
+  axon.setPixelColor(0, NONE);
   for(int i = 0; i < DRESSLEDARRAYLENGTH; i++){
-      currentColors[i] = 0x000000;
+      currentChestColors[i] = NONE;
   }
+
+  axon.begin();
+  array1.begin();
 }
 
 void loop(){
@@ -40,32 +49,44 @@ void loop(){
       //We're processing, everything hold up
       readyToRead = false;
       
-      //Read out data into target color array
-      for(int i=0;i<DRESSLEDARRAYLENGTH;i++){
+      //Get target colors from serial for the chest piece
+      for(int i=0;i<DRESSLEDARRAYLENGTH;i++){ //For the chest piece
         char c = Serial.read();
         if (c == -1) {
           c = 'n';
         }
-        targetColors[i] = convertToColor(c);
+        targetChestColors[i] = convertToColor(c);
       }
 
-      //Transition currentColors to targetColors
+      //Get target colors from the serial for the axon
+      char c = Serial.read();
+      if (c == -1) {
+        c = 'n';
+      }
+      targetAxonColor = convertToColor(c); //Axon color will be the last character transmitted
+
+      //Transition currentColors to targetColors on all LEDs
       uint32_t tempArray [DRESSLEDARRAYLENGTH];
       for(int i=1;i<stepMax+1;i++){
         for(int j=0;j<DRESSLEDARRAYLENGTH;j++){
-          tempArray[j] = calculateTransitionColor(currentColors[j], targetColors[j], i, stepMax);
+          tempArray[j] = calculateTransitionColor(currentChestColors[j], targetChestColors[j], i, stepMax);
         }
 
+        uint32_t tempAxonColor = calculateTransitionColor(currentAxonColor, targetAxonColor, i, stepMax);
+
         //Then show it briefly
-        writeToArray(tempArray);
+        writeToArray(tempArray, array1);
+        writeToArray(tempAxonColor, axon);
         delay(stepTime);
       }
       
       //Then assign the current array to what the target was (cause we are already there...right?)
       for(int i = 0; i < DRESSLEDARRAYLENGTH; i++){
-        currentColors[i] = tempArray[i];
+        currentChestColors[i] = tempArray[i];
       }
-      writeToArray(currentColors);
+      currentAxonColor = targetAxonColor;
+      writeToArray(currentChestColors, array1);
+      writeToArray(currentAxonColor, axon);
 
       //Ready to read again
       readyToRead = true;
@@ -99,6 +120,19 @@ void writeToArray(uint32_t arr[]) {
   }
 
   array1.show();
+}
+
+void writeToArray(uint32_t arr [], Adafruit_NeoPixel ledArray) {
+  for (int i = 0; i < sizeof(ledArray); i++) {
+    ledArray.setPixelColor(i, arr[i]);
+  }
+
+  ledArray.show();
+}
+
+void writeToArray(uint32_t arr, Adafruit_NeoPixel ledArray) {
+  ledArray.setPixelColor(0, arr);
+  ledArray.show();
 }
 
 //given a single character from the serial line, turn that into a numeric code representing to color

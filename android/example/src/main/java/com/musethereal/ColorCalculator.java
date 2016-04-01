@@ -53,6 +53,7 @@ public class ColorCalculator {
 
         String returnString = "";
 
+        //Figure out the chest piece colors
         for (int i = 0; i < channelList.length ; i++){
             int dominantChannel = 0;
             for (int j = 1; j < 5; j++){
@@ -62,7 +63,43 @@ public class ColorCalculator {
             returnString = returnString + colormap[dominantChannel];
         }
 
+        //And add one more character for the 'consensus' color to be used for the axon
+        returnString = returnString + findConsensusColor(returnString);
+
         return returnString;
+    }
+
+    private String findConsensusColor(String returnString) {
+        //count up number of r/y/g/b/v
+        HashMap<Character, Integer> colorCounter = new HashMap<>();
+        colorCounter.put('r', characterCount(returnString, 'r'));
+        colorCounter.put('y', characterCount(returnString, 'y'));
+        colorCounter.put('g', characterCount(returnString, 'g'));
+        colorCounter.put('b', characterCount(returnString, 'r'));
+        colorCounter.put('v', characterCount(returnString, 'v'));
+
+//        int rCount = characterCount(returnString, 'r');
+//        int yCount = characterCount(returnString, 'y');
+//        int gCount = characterCount(returnString, 'g');
+//        int bCount = characterCount(returnString, 'b');
+//        int vCount = characterCount(returnString, 'v');
+
+        //if any one is dominant - return that
+        //if mix r/y = o, g/b = c, v/r = p
+        //all else = w
+
+        return "w";
+    }
+
+    private Integer characterCount (String str, char characterToFind){
+        int count = 0;
+        for (int i = 0; i < str.length(); i++){
+            if (str.charAt(i) == characterToFind){
+                count = count + 1;
+            }
+        }
+
+        return count;
     }
 
     public String EmptyString(){
