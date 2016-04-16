@@ -35,13 +35,15 @@ void setup() {
   array1.begin();
 
   //Initialize current colors to be blank
-  axon.setPixelColor(0, NONE);
+  currentAxonColor = NONE;
+  targetAxonColor = NONE;
   for(int i = 0; i < DRESSLEDARRAYLENGTH; i++){
       currentChestColors[i] = NONE;
+      targetChestColors[i] = NONE;
   }
 
-  axon.begin();
-  array1.begin();
+  writeToChest(targetChestColors);
+  writeToAxon(targetAxonColor);
 }
 
 void loop(){
@@ -57,7 +59,6 @@ void loop(){
         }
         targetChestColors[i] = convertToColor(c);
       }
-
       //Get target colors from the serial for the axon
       char c = Serial.read();
       if (c == -1) {
@@ -71,22 +72,21 @@ void loop(){
         for(int j=0;j<DRESSLEDARRAYLENGTH;j++){
           tempArray[j] = calculateTransitionColor(currentChestColors[j], targetChestColors[j], i, stepMax);
         }
-
         uint32_t tempAxonColor = calculateTransitionColor(currentAxonColor, targetAxonColor, i, stepMax);
 
         //Then show it briefly
-        writeToArray(tempArray, array1);
-        writeToArray(tempAxonColor, axon);
+        writeToChest(tempArray);
+        writeToAxon(tempAxonColor);
         delay(stepTime);
       }
-      
+
       //Then assign the current array to what the target was (cause we are already there...right?)
       for(int i = 0; i < DRESSLEDARRAYLENGTH; i++){
         currentChestColors[i] = tempArray[i];
       }
       currentAxonColor = targetAxonColor;
-      writeToArray(currentChestColors, array1);
-      writeToArray(currentAxonColor, axon);
+      writeToChest(currentChestColors);
+      writeToAxon(currentAxonColor);
 
       //Ready to read again
       readyToRead = true;
@@ -114,25 +114,17 @@ uint32_t calculateTransitionColor(uint32_t currentColor, uint32_t targetColor, i
   return calc;
 }
 
-void writeToArray(uint32_t arr[]) { 
+void writeToChest(uint32_t arr []) {
   for (int i = 0; i < DRESSLEDARRAYLENGTH; i++) {
-    array1.setPixelColor(i, arr[i]); 
+    array1.setPixelColor(i, arr[i]);
   }
 
   array1.show();
 }
 
-void writeToArray(uint32_t arr [], Adafruit_NeoPixel ledArray) {
-  for (int i = 0; i < sizeof(ledArray); i++) {
-    ledArray.setPixelColor(i, arr[i]);
-  }
-
-  ledArray.show();
-}
-
-void writeToArray(uint32_t arr, Adafruit_NeoPixel ledArray) {
-  ledArray.setPixelColor(0, arr);
-  ledArray.show();
+void writeToAxon(uint32_t arr) {
+  axon.setPixelColor(0, arr);
+  axon.show();
 }
 
 //given a single character from the serial line, turn that into a numeric code representing to color
