@@ -2,6 +2,7 @@ package com.musethereal;
 import com.emotiv.insight.IEdk;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 /*
@@ -75,20 +76,25 @@ public class ColorCalculator {
         colorCounter.put('r', characterCount(returnString, 'r'));
         colorCounter.put('y', characterCount(returnString, 'y'));
         colorCounter.put('g', characterCount(returnString, 'g'));
-        colorCounter.put('b', characterCount(returnString, 'r'));
+        colorCounter.put('b', characterCount(returnString, 'b'));
         colorCounter.put('v', characterCount(returnString, 'v'));
 
-//        int rCount = characterCount(returnString, 'r');
-//        int yCount = characterCount(returnString, 'y');
-//        int gCount = characterCount(returnString, 'g');
-//        int bCount = characterCount(returnString, 'b');
-//        int vCount = characterCount(returnString, 'v');
+        double maxPercentage = 0.0;
+        Map.Entry winner = null;
+        for (Map.Entry<Character, Integer> entry : colorCounter.entrySet()){
+            double percentage = entry.getValue().doubleValue() / 13.0;
 
-        //if any one is dominant - return that
-        //if mix r/y = o, g/b = c, v/r = p
-        //all else = w
+            if (percentage > maxPercentage) {
+                winner = entry;
+                maxPercentage = percentage;
+            }
+        }
 
-        return "w";
+        if (maxPercentage > 0.60) {
+            return winner.getKey().toString();
+        } else {
+            return "w";
+        }
     }
 
     private Integer characterCount (String str, char characterToFind){
